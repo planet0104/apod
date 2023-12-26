@@ -1,0 +1,21 @@
+[package]
+name = "apod"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+tao = "0.24.0"
+tray-icon = "0.11.1"
+anyhow = "1"
+chrono = "0.4.31"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+wallpaper = { version = "3", features = ["from_url"] }
+image = { version = "0.24.7", default-features = false, features = ["ico"]}
+fastrand = "2.0.1"
+
+[build-dependencies]
+winres = "0.1.12"
+
+[profile.release]
+lto = true
+opt-level = "z"
