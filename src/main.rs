@@ -2,6 +2,7 @@
 
 use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
+use image::EncodableLayout;
 use std::collections::HashMap;
 use tao::event_loop::{ControlFlow, EventLoopBuilder};
 use tray_icon::{
@@ -81,8 +82,6 @@ fn download_picture_async(date: DateTime<Utc>) {
 
 // 下载壁纸
 fn download_picture(date: DateTime<Utc>) -> Result<String> {
-    //api示例: https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY
-    // let api_key = std::env::var("NASA_API_KEY")?;
     let api_key = "DEMO_KEY";
     let formatted_date = date.format("%Y-%m-%d").to_string();
     let json = reqwest::blocking::get(format!(
@@ -96,6 +95,25 @@ fn download_picture(date: DateTime<Utc>) -> Result<String> {
     };
     println!("下载:{url}...");
     wallpaper::set_from_url(url).map_err(|err| anyhow!("{:?}", err))?;
+
+    //设置锁屏
+    #[cfg(target_os = "windows")]
+    {
+        use windows::{Storage::StorageFile, core::HSTRING, System::UserProfile::LockScreen};
+        //下载图片
+        let mut file_name = match dirs::download_dir(){
+            Some(p) => p,
+            None => return Err(anyhow!("路径错误"))
+        };
+        file_name.push(format!("lock-screen-{}.jpg", date.format("%Y-%m-%d")));
+        image::load_from_memory(reqwest::blocking::get(url)?.bytes()?.as_bytes())?.save(&file_name)?;
+        if let Some(path) = file_name.to_str(){
+            let file = StorageFile::GetFileFromPathAsync(&HSTRING::from(path))?.get()?;
+            LockScreen::SetImageFileAsync(&file)?.get()?;
+            println!("锁屏设置成功:{path}");
+        }
+    }
+
     Ok(url.to_string())
 }
 
