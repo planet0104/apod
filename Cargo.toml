@@ -1,6 +1,6 @@
 [package]
 name = "apod"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 
 [dependencies]
@@ -12,6 +12,7 @@ reqwest = { version = "0.11", features = ["blocking", "json"] }
 wallpaper = { version = "3", features = ["from_url"] }
 image = { version = "0.24.7", default-features = false, features = ["ico", "jpeg"]}
 fastrand = "2.0.1"
+arboard = "3.3.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows ={ version = "0.51", features = [ "Win32_UI_Shell", "Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Storage", "System_UserProfile", "Foundation"]}
@@ -27,4 +28,4 @@ opt-level = "z"
 [package.metadata.winres]
 OriginalFilename = "apod.exe"
 ProductName = "Astronomy Picture of the Day"
-ProductVersion = "1.0.1"
+ProductVersion = "1.0.2"
