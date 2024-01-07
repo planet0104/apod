@@ -165,8 +165,16 @@ fn download_picture(mut info: DownloadInfo) -> Result<HashMap<String, String>> {
             None => return Err(anyhow!("路径错误")),
         };
         file_name.push(format!("lock-screen-{}.jpg", info.date.format("%Y-%m-%d")));
-        image::load_from_memory(reqwest::blocking::get(url)?.bytes()?.as_bytes())?
-            .save(&file_name)?;
+        let img = match image::load_from_memory(reqwest::blocking::get(url)?.bytes()?.as_bytes()) {
+            Err(err) => {
+                eprintln!("图片格式错误:{:?}", err);
+                //往前一天
+                info.date = info.date - chrono::Duration::days(1);
+                return download_picture(info);
+            }
+            Ok(img) => img
+        };
+        img.save(&file_name)?;
         if let Some(path) = file_name.to_str() {
             let file = StorageFile::GetFileFromPathAsync(&HSTRING::from(path))?.get()?;
             LockScreen::SetImageFileAsync(&file)?.get()?;
